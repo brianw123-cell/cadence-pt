@@ -97,6 +97,7 @@ export default function DenialsPage() {
               <div key={`${risk.referralId}-${risk.ruleCode}-${i}`} className={`card p-4 md:p-5 ${tone.bg}`}>
                 <div className="flex items-start gap-3 md:gap-4">
                   <span className={`badge ${tone.badge} px-2.5 flex-shrink-0`}>
+                    <span className="sr-only">Severity: </span>
                     {tone.label}
                   </span>
                   <div className="flex-1 min-w-0">

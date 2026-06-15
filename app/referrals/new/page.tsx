@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useReferralsRepo } from "@/lib/repo";
 import { newReferralSchema, flattenZodErrors } from "@/lib/schemas";
 import { toast } from "@/lib/toast";
@@ -257,17 +257,27 @@ function Field({
 }: {
   label: string;
   error?: string;
-  children: React.ReactNode;
+  children: React.ReactElement;
 }) {
-  // Wrap the input inside the label so the association is implicit; axe-core
-  // accepts this as a valid label-control pairing without needing htmlFor/id.
+  const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const errorId = `${slug}-error`;
+  // Inject aria-describedby + aria-invalid onto the actual form control so
+  // screen readers announce the error inline as the user moves into the field.
+  const child = React.cloneElement(children, {
+    "aria-invalid": error ? true : undefined,
+    "aria-describedby": error ? errorId : undefined,
+  } as React.HTMLAttributes<HTMLElement>);
   return (
     <div>
       <label className="block">
         <span className="label">{label}</span>
-        {children}
+        {child}
       </label>
-      {error && <div className="text-xs text-red-700 mt-1">{error}</div>}
+      {error && (
+        <div id={errorId} role="alert" className="text-xs text-red-700 mt-1">
+          {error}
+        </div>
+      )}
     </div>
   );
 }

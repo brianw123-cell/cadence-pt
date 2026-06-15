@@ -48,16 +48,17 @@ export default function PhysiciansPage() {
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm min-w-[800px]">
+          <caption className="sr-only">Referring physician scorecard ranked by revenue attribution</caption>
           <thead className="bg-stone-50 border-b border-stone-200">
             <tr className="text-left text-xs uppercase tracking-wide text-stone-700">
-              <th className="px-4 py-3 font-semibold">Physician</th>
-              <th className="px-4 py-3 font-semibold text-center">Referrals</th>
-              <th className="px-4 py-3 font-semibold text-center">Conv. %</th>
-              <th className="px-4 py-3 font-semibold text-center">Avg days to eval</th>
-              <th className="px-4 py-3 font-semibold text-center">Evaluated</th>
-              <th className="px-4 py-3 font-semibold text-center">POC compliance</th>
-              <th className="px-4 py-3 font-semibold text-right">Revenue</th>
-              <th className="px-4 py-3 font-semibold text-right">Last sent</th>
+              <th scope="col" className="px-4 py-3 font-semibold">Physician</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-center">Referrals</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-center">Conv. %</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-center">Avg days to eval</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-center">Evaluated</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-center">POC compliance</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-right">Revenue</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-right">Last sent</th>
             </tr>
           </thead>
           <tbody>

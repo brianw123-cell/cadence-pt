@@ -101,15 +101,16 @@ export default function PatientsPage() {
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm min-w-[700px]">
+            <caption className="sr-only">Active patient roster with RTM enrollment status</caption>
             <thead className="bg-stone-50 border-b border-stone-200">
               <tr className="text-left">
-                <th className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Patient</th>
-                <th className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Age</th>
-                <th className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Diagnosis</th>
-                <th className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Payer</th>
-                <th className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Therapist</th>
-                <th className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">RTM</th>
-                <th />
+                <th scope="col" className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Patient</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Age</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Diagnosis</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Payer</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">Therapist</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-stone-700 text-xs uppercase tracking-wide">RTM</th>
+                <th scope="col"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
             <tbody>

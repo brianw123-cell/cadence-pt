@@ -73,30 +73,31 @@ export default function BillingPage() {
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm min-w-[700px]">
+          <caption className="sr-only">Monthly RTM billing report with CPT code breakdown per patient</caption>
           <thead className="bg-stone-50 border-b border-stone-200">
             <tr className="text-left text-xs uppercase tracking-wide text-stone-700">
-              <th className="px-4 py-3 font-semibold">Patient</th>
-              <th className="px-4 py-3 font-semibold">Payer</th>
-              <th className="px-4 py-3 font-semibold">Months</th>
-              <th className="px-4 py-3 font-semibold text-right">
+              <th scope="col" className="px-4 py-3 font-semibold">Patient</th>
+              <th scope="col" className="px-4 py-3 font-semibold">Payer</th>
+              <th scope="col" className="px-4 py-3 font-semibold">Months</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-right">
                 98975
                 <InfoTip label="CPT 98975">
                   Initial setup &amp; patient education. Billed once per episode of care. CMS 2026 rate: {formatCurrency(RTM_RATES.setup.amount)}.
                 </InfoTip>
               </th>
-              <th className="px-4 py-3 font-semibold text-right">
+              <th scope="col" className="px-4 py-3 font-semibold text-right">
                 98977
                 <InfoTip label="CPT 98977">
                   Musculoskeletal RTM monitoring, billed once every 30 days. CMS 2026 rate: {formatCurrency(RTM_RATES.monitorMSK.amount)}.
                 </InfoTip>
               </th>
-              <th className="px-4 py-3 font-semibold text-right">
+              <th scope="col" className="px-4 py-3 font-semibold text-right">
                 98980
                 <InfoTip label="CPT 98980">
                   First 20 minutes of monthly RTM management. Only one clinician per 30-day period. CMS 2026 rate: {formatCurrency(RTM_RATES.manageFirst20.amount)}.
                 </InfoTip>
               </th>
-              <th className="px-4 py-3 font-semibold text-right">Total</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-right">Total</th>
             </tr>
           </thead>
           <tbody>

@@ -120,13 +120,14 @@ export default function MoneyPage() {
         </h2>
         <div className="card overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
+            <caption className="sr-only">Per-therapist productivity with visit count and revenue contribution</caption>
             <thead className="bg-stone-50 border-b border-stone-200">
               <tr className="text-left text-xs uppercase tracking-wide text-stone-700">
-                <th className="px-4 py-3 font-semibold">Therapist</th>
-                <th className="px-4 py-3 font-semibold text-center">Active patients</th>
-                <th className="px-4 py-3 font-semibold text-center">Visits</th>
-                <th className="px-4 py-3 font-semibold text-center">RTM enrolled</th>
-                <th className="px-4 py-3 font-semibold text-right">Revenue generated</th>
+                <th scope="col" className="px-4 py-3 font-semibold">Therapist</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-center">Active patients</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-center">Visits</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-center">RTM enrolled</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-right">Revenue generated</th>
               </tr>
             </thead>
             <tbody>

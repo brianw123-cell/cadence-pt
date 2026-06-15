@@ -64,6 +64,7 @@ function ActiveAuth({
         <span
           className={`badge ${atRisk ? "bg-red-100 text-red-800" : "bg-emerald-100 text-emerald-800"}`}
         >
+          <span className="sr-only">Authorization status: </span>
           {atRisk ? "AT RISK" : auth.status}
         </span>
       </div>

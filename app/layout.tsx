@@ -3,6 +3,7 @@ import "./globals.css";
 import SiteHeader from "@/components/SiteHeader";
 import DemoBanner from "@/components/DemoBanner";
 import StorageHealthCheck from "@/components/StorageHealthCheck";
+import SupabaseBoot from "@/components/SupabaseBoot";
 import Toaster from "@/components/Toaster";
 
 // No-FOUC: set the theme class on <html> before paint to prevent a light→dark flash.
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
+        <SupabaseBoot />
         <DemoBanner />
         <StorageHealthCheck />
         <SiteHeader />
@@ -45,7 +47,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="font-semibold text-amber-700 dark:text-amber-400">DEMO data only</span> ·
               No real PHI · Not for clinical use
             </span>
-            <span>v0.3 · June 2026</span>
+            <span>
+              <a href="/accessibility" className="hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 rounded">
+                Accessibility statement
+              </a>
+              <span className="mx-2">·</span>
+              v0.4 · June 2026
+            </span>
           </div>
         </footer>
       </body>
