@@ -33,11 +33,25 @@ export default function PatientAppPage() {
       </div>
 
       <div className="grid lg:grid-cols-5 gap-6 lg:gap-8 items-start">
-        {/* Phone frame */}
-        <div className="lg:col-span-2 flex justify-center">
-          <div className="relative origin-top scale-90 sm:scale-100">
+        {/* Phone frame — uses a fixed-width inner with a responsive scale wrapper
+            that also collapses the outer layout box so it doesn't overflow narrow
+            viewports. The inner content keeps its fixed 320px design so the
+            cards, exercise rows, and status bar all render proportionally. */}
+        <div className="lg:col-span-2 flex justify-center overflow-hidden">
+          <div
+            className="relative origin-top sm:origin-top-left mx-auto"
+            style={{
+              // Layout-aware scaling: shrink space taken by 12% on mobile, by 0% on sm+
+              width: 320,
+              maxWidth: "100%",
+            }}
+          >
+            <div
+              className="relative scale-[0.85] sm:scale-100 origin-top"
+              style={{ width: 320, marginBottom: -99 /* compensate for scale's vertical shrink */ }}
+            >
             {/* iPhone outer frame */}
-            <div className="rounded-[3rem] bg-stone-900 p-3 shadow-2xl" style={{ width: 320, height: 660 }}>
+            <div className="rounded-[3rem] bg-stone-900 p-3 shadow-2xl mx-auto" style={{ width: 320, height: 660 }}>
               {/* Screen */}
               <div className="rounded-[2.3rem] bg-gradient-to-br from-teal-50 to-cream-100 h-full overflow-hidden relative flex flex-col">
                 {/* Notch */}
@@ -211,6 +225,7 @@ export default function PatientAppPage() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
 

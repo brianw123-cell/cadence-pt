@@ -2,6 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme tokens — flipped by .dark on <html>.
+   Every component that uses .card / body bg / .input picks these up
+   automatically so dark mode requires almost no per-component changes. */
+:root {
+  color-scheme: light;
+  --bg: #fbfaf6;
+  --fg: #0c1f24;
+  --muted: #57534e;
+  --subtle: #78716c;
+  --card-bg: #ffffff;
+  --card-border: #e7e5e4;
+  --input-bg: #ffffff;
+  --input-border: #d6d3d1;
+  --header-bg: #ffffff;
+  --header-border: #e7e5e4;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --bg: #0f1c1f;
+  --fg: #f5f5f4;
+  --muted: #d6d3d1;
+  --subtle: #a8a29e;
+  --card-bg: #1f2a2d;
+  --card-border: #44403c;
+  --input-bg: #1f2a2d;
+  --input-border: #57534e;
+  --header-bg: #1c2528;
+  --header-border: #44403c;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Dark mode text/background overrides for the common Tailwind classes used
+   throughout the app. This is cheaper than sweeping every page with dark:
+   variants and keeps the codebase compact. New pages added later will
+   automatically get reasonable dark-mode treatment via these rules. */
+:root.dark .text-stone-900 { color: rgb(245 245 244); }
+:root.dark .text-stone-800 { color: rgb(231 229 228); }
+:root.dark .text-stone-700 { color: rgb(214 211 209); }
+:root.dark .text-stone-600 { color: rgb(168 162 158); }
+:root.dark .text-stone-500 { color: rgb(168 162 158); }
+:root.dark .text-teal-900   { color: rgb(153 246 228); }
+:root.dark .text-teal-800   { color: rgb(94 234 212); }
+:root.dark .text-teal-700   { color: rgb(45 212 191); }
+
+:root.dark .bg-white         { background-color: var(--card-bg); }
+:root.dark .bg-stone-50      { background-color: rgb(41 37 36); }
+:root.dark .bg-stone-100     { background-color: rgb(41 37 36); }
+:root.dark .border-stone-200 { border-color: rgb(68 64 60); }
+:root.dark .border-stone-300 { border-color: rgb(68 64 60); }
+:root.dark .border-stone-100 { border-color: rgb(41 37 36); }
+
+/* Light "tinted" accent backgrounds — soften for dark mode so colored badges
+   and callouts still read as colored without the harsh light background. */
+:root.dark .bg-teal-50    { background-color: rgb(19 78 74 / 0.4); }
+:root.dark .bg-teal-100   { background-color: rgb(19 78 74 / 0.5); }
+:root.dark .bg-emerald-50 { background-color: rgb(6 78 59 / 0.4); }
+:root.dark .bg-emerald-100{ background-color: rgb(6 78 59 / 0.5); }
+:root.dark .bg-amber-50   { background-color: rgb(120 53 15 / 0.35); }
+:root.dark .bg-amber-100  { background-color: rgb(120 53 15 / 0.5); }
+:root.dark .bg-red-50     { background-color: rgb(127 29 29 / 0.35); }
+:root.dark .bg-red-100    { background-color: rgb(127 29 29 / 0.5); }
+:root.dark .bg-blue-50    { background-color: rgb(30 58 138 / 0.35); }
+:root.dark .bg-blue-100   { background-color: rgb(30 58 138 / 0.5); }
+:root.dark .bg-indigo-50  { background-color: rgb(49 46 129 / 0.35); }
+:root.dark .bg-indigo-100 { background-color: rgb(49 46 129 / 0.5); }
+:root.dark .bg-cyan-50    { background-color: rgb(22 78 99 / 0.35); }
+:root.dark .bg-lime-50    { background-color: rgb(63 98 18 / 0.35); }
+
+/* Borders on tinted cards */
+:root.dark .border-teal-200   { border-color: rgb(20 184 166 / 0.4); }
+:root.dark .border-emerald-200{ border-color: rgb(16 185 129 / 0.4); }
+:root.dark .border-amber-200  { border-color: rgb(245 158 11 / 0.4); }
+:root.dark .border-amber-300  { border-color: rgb(245 158 11 / 0.5); }
+:root.dark .border-red-200    { border-color: rgb(239 68 68 / 0.4); }
+:root.dark .border-blue-200   { border-color: rgb(59 130 246 / 0.4); }
+:root.dark .border-indigo-200 { border-color: rgb(99 102 241 / 0.4); }
+:root.dark .border-cyan-200   { border-color: rgb(34 211 238 / 0.4); }
+
+/* Text on tinted accent cards — bump to lighter shade for readability */
+:root.dark .text-teal-900    { color: rgb(153 246 228); }
+:root.dark .text-emerald-900 { color: rgb(167 243 208); }
+:root.dark .text-emerald-800 { color: rgb(110 231 183); }
+:root.dark .text-amber-900   { color: rgb(254 215 170); }
+:root.dark .text-amber-800   { color: rgb(252 211 77); }
+:root.dark .text-red-900     { color: rgb(254 202 202); }
+:root.dark .text-red-800     { color: rgb(252 165 165); }
+
 /* Toast slide-in */
 @keyframes slideIn {
   from { transform: translateY(8px); opacity: 0; }
@@ -11,9 +104,9 @@
 /* Print: hide UI chrome, show only the page content */
 @media print {
   header, footer, nav, .no-print { display: none !important; }
-  body { background: white !important; }
+  body { background: white !important; color: black !important; }
   main { padding: 0 !important; max-width: none !important; }
-  .card { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; }
+  .card { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; background: white !important; }
   table { font-size: 11px !important; }
 }
 
@@ -22,21 +115,11 @@
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
-:root {
-  --color-bg: #fbfaf6;
-  --color-fg: #0c1f24;
-  --color-border: #e5e0d3;
-}
-
-html, body {
-  background: var(--color-bg);
-  color: var(--color-fg);
-  -webkit-font-smoothing: antialiased;
-}
-
 @layer components {
   .card {
-    @apply rounded-lg border border-stone-200 bg-white shadow-sm;
+    @apply rounded-lg shadow-sm border;
+    background: var(--card-bg);
+    border-color: var(--card-border);
   }
   .btn {
     @apply inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition;
@@ -45,15 +128,25 @@ html, body {
     @apply btn bg-teal-700 text-white hover:bg-teal-800;
   }
   .btn-secondary {
-    @apply btn bg-stone-100 text-stone-800 border border-stone-300 hover:bg-stone-200;
+    @apply btn border;
+    background: var(--card-bg);
+    border-color: var(--input-border);
+    color: var(--fg);
+  }
+  .btn-secondary:hover {
+    background: var(--card-border);
   }
   .badge {
     @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
   }
   .input {
-    @apply w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600;
+    @apply w-full rounded-md border px-3 py-2 text-sm focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600;
+    background: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--fg);
   }
   .label {
-    @apply block text-xs font-semibold uppercase tracking-wide text-stone-600 mb-1;
+    @apply block text-xs font-semibold uppercase tracking-wide mb-1;
+    color: var(--muted);
   }
 }

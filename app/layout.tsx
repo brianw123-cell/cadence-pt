@@ -5,6 +5,15 @@ import DemoBanner from "@/components/DemoBanner";
 import StorageHealthCheck from "@/components/StorageHealthCheck";
 import Toaster from "@/components/Toaster";
 
+// No-FOUC: set the theme class on <html> before paint to prevent a light→dark flash.
+const themeInit = `
+try {
+  var t = localStorage.getItem('cadence-theme');
+  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (t === 'dark' || (!t && prefersDark)) document.documentElement.classList.add('dark');
+} catch (e) {}
+`;
+
 export const metadata: Metadata = {
   title: "Cadence PT — Referral Lifecycle + RTM Revenue",
   description:
@@ -13,7 +22,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      </head>
       <body className="min-h-screen">
         <a
           href="#main"
@@ -26,14 +38,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteHeader />
         <main id="main" className="mx-auto max-w-7xl px-4 md:px-6 py-6 md:py-8">{children}</main>
         <Toaster />
-        <footer className="border-t border-stone-200 mt-16">
-          <div className="mx-auto max-w-7xl px-4 md:px-6 py-6 text-xs text-stone-500 flex flex-col sm:flex-row sm:justify-between gap-1">
+        <footer className="border-t mt-16" style={{ borderColor: "var(--card-border)" }}>
+          <div className="mx-auto max-w-7xl px-4 md:px-6 py-6 text-xs flex flex-col sm:flex-row sm:justify-between gap-1" style={{ color: "var(--subtle)" }}>
             <span>
               Cadence PT — POC build ·{" "}
-              <span className="font-semibold text-amber-700">DEMO data only</span> ·
+              <span className="font-semibold text-amber-700 dark:text-amber-400">DEMO data only</span> ·
               No real PHI · Not for clinical use
             </span>
-            <span>v0.2 · June 2026</span>
+            <span>v0.3 · June 2026</span>
           </div>
         </footer>
       </body>
