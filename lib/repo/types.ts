@@ -18,6 +18,12 @@ import type {
   ReferralStage,
   POCTransmission,
   Authorization,
+  Appointment,
+  AppointmentStatus,
+  Followup,
+  FollowupStatus,
+  WaitlistEntry,
+  WaitlistStatus,
 } from "@/lib/types";
 
 export interface ReferralsRepo {
@@ -49,9 +55,37 @@ export interface PROMsRepo {
   create(s: Omit<PROMScore, "id">): void;
 }
 
+export interface AppointmentsRepo {
+  list(): Appointment[];
+  listForPatient(patientId: string): Appointment[];
+  create(a: Omit<Appointment, "id">): void;
+  createBatch(as: Omit<Appointment, "id">[]): void;
+  updateStatus(id: string, status: AppointmentStatus): void;
+}
+
+export interface FollowupsRepo {
+  list(): Followup[];
+  listForPatient(patientId: string): Followup[];
+  create(f: Omit<Followup, "id">): void;
+  updateStatus(
+    id: string,
+    status: FollowupStatus,
+    extra?: { notes?: string; completedBy?: string },
+  ): void;
+}
+
+export interface WaitlistRepo {
+  list(): WaitlistEntry[];
+  create(w: Omit<WaitlistEntry, "id" | "addedAt">): void;
+  updateStatus(id: string, status: WaitlistStatus): void;
+}
+
 export interface CadenceRepo {
   referrals: ReferralsRepo;
   patients: PatientsRepo;
   checkins: CheckinsRepo;
   proms: PROMsRepo;
+  appointments: AppointmentsRepo;
+  followups: FollowupsRepo;
+  waitlist: WaitlistRepo;
 }

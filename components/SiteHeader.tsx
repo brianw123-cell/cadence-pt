@@ -7,9 +7,12 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 const links = [
   { href: "/", label: "Dashboard" },
+  { href: "/schedule", label: "Schedule" },
   { href: "/referrals", label: "Referrals" },
-  { href: "/physicians", label: "Physicians" },
   { href: "/patients", label: "Patients" },
+  { href: "/followups", label: "Follow-ups" },
+  { href: "/waitlist", label: "Waitlist" },
+  { href: "/physicians", label: "Physicians" },
   { href: "/rtm", label: "RTM" },
   { href: "/outcomes", label: "Outcomes" },
   { href: "/billing", label: "Billing" },

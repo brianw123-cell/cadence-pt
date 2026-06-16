@@ -18,6 +18,9 @@ import type {
   PatientsRepo,
   CheckinsRepo,
   PROMsRepo,
+  AppointmentsRepo,
+  FollowupsRepo,
+  WaitlistRepo,
 } from "./types";
 
 export function useReferralsRepo(): ReferralsRepo {
@@ -71,5 +74,45 @@ export function usePROMsRepo(): PROMsRepo {
     list: () => proms,
     listForPatient: (patientId) => proms.filter((p) => p.patientId === patientId),
     create: addPROMScore,
+  };
+}
+
+export function useAppointmentsRepo(): AppointmentsRepo {
+  const appointments = useAppStore((s) => s.appointments);
+  const addAppointment = useAppStore((s) => s.addAppointment);
+  const addAppointmentBatch = useAppStore((s) => s.addAppointmentBatch);
+  const updateAppointmentStatus = useAppStore((s) => s.updateAppointmentStatus);
+
+  return {
+    list: () => appointments,
+    listForPatient: (patientId) => appointments.filter((a) => a.patientId === patientId),
+    create: addAppointment,
+    createBatch: addAppointmentBatch,
+    updateStatus: updateAppointmentStatus,
+  };
+}
+
+export function useFollowupsRepo(): FollowupsRepo {
+  const followups = useAppStore((s) => s.followups);
+  const addFollowup = useAppStore((s) => s.addFollowup);
+  const updateFollowupStatus = useAppStore((s) => s.updateFollowupStatus);
+
+  return {
+    list: () => followups,
+    listForPatient: (patientId) => followups.filter((f) => f.patientId === patientId),
+    create: addFollowup,
+    updateStatus: updateFollowupStatus,
+  };
+}
+
+export function useWaitlistRepo(): WaitlistRepo {
+  const waitlist = useAppStore((s) => s.waitlist);
+  const addWaitlistEntry = useAppStore((s) => s.addWaitlistEntry);
+  const updateWaitlistStatus = useAppStore((s) => s.updateWaitlistStatus);
+
+  return {
+    list: () => waitlist,
+    create: addWaitlistEntry,
+    updateStatus: updateWaitlistStatus,
   };
 }

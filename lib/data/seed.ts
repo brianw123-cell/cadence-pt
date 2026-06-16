@@ -1,10 +1,26 @@
-import type { Referral, Patient, RTMCheckin, PROMScore } from "@/lib/types";
+import type {
+  Referral,
+  Patient,
+  RTMCheckin,
+  PROMScore,
+  Appointment,
+  Followup,
+  WaitlistEntry,
+} from "@/lib/types";
 
 const today = "2026-06-14";
 const daysAgo = (n: number): string => {
   const d = new Date(today);
   d.setDate(d.getDate() - n);
   return d.toISOString().slice(0, 10);
+};
+
+// ISO timestamp at given local-ish hour, N days from today
+const apptAt = (offsetDays: number, hour: number, minute = 0): string => {
+  const d = new Date(today);
+  d.setDate(d.getDate() + offsetDays);
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
 };
 
 export const seedReferrals: Referral[] = [
@@ -369,4 +385,124 @@ export const seedCheckins: RTMCheckin[] = [
   ...genCheckins("pt-5006", 15, 3, 4),
   ...genCheckins("pt-5007", 10, 6, 6),
   ...genCheckins("pt-5003", 1, 0, 4),
+];
+
+// Appointments — past visits (completed/no-show/cancelled) + future scheduled
+export const seedAppointments: Appointment[] = [
+  // PAST (completed) for Susan Kowalski — 5 visits in last 25 days
+  { id: "apt-6001", patientId: "pt-5001", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(-23, 9, 0), durationMinutes: 60, visitType: "evaluation", status: "completed", location: "Main Clinic" },
+  { id: "apt-6002", patientId: "pt-5001", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(-18, 9, 0), durationMinutes: 45, visitType: "treatment", status: "completed", location: "Main Clinic" },
+  { id: "apt-6003", patientId: "pt-5001", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(-14, 9, 0), durationMinutes: 45, visitType: "treatment", status: "completed", location: "Main Clinic" },
+  { id: "apt-6004", patientId: "pt-5001", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(-10, 9, 0), durationMinutes: 45, visitType: "treatment", status: "no-show", location: "Main Clinic", notes: "Patient called same-day citing transportation issue." },
+  { id: "apt-6005", patientId: "pt-5001", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(-7, 9, 0), durationMinutes: 45, visitType: "treatment", status: "completed", location: "Main Clinic" },
+
+  // PAST for Eleanor Brooks — 5 visits, hit auth limit
+  { id: "apt-6010", patientId: "pt-5002", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(-42, 10, 0), durationMinutes: 60, visitType: "evaluation", status: "completed", location: "Main Clinic" },
+  { id: "apt-6011", patientId: "pt-5002", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(-35, 10, 0), durationMinutes: 45, visitType: "treatment", status: "completed", location: "Main Clinic" },
+  { id: "apt-6012", patientId: "pt-5002", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(-28, 10, 0), durationMinutes: 45, visitType: "treatment", status: "completed", location: "Main Clinic" },
+  { id: "apt-6013", patientId: "pt-5002", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(-14, 10, 0), durationMinutes: 45, visitType: "treatment", status: "completed", location: "Main Clinic" },
+  { id: "apt-6014", patientId: "pt-5002", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(-7, 10, 0), durationMinutes: 45, visitType: "treatment", status: "completed", location: "Main Clinic" },
+
+  // FUTURE — upcoming appointments
+  { id: "apt-6020", patientId: "pt-5001", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(1, 9, 0),   durationMinutes: 45, visitType: "treatment", status: "confirmed", location: "Main Clinic" },
+  { id: "apt-6021", patientId: "pt-5001", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(3, 9, 0),   durationMinutes: 45, visitType: "treatment", status: "scheduled", location: "Main Clinic" },
+  { id: "apt-6022", patientId: "pt-5006", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(1, 11, 0),  durationMinutes: 45, visitType: "treatment", status: "confirmed", location: "Main Clinic" },
+  { id: "apt-6023", patientId: "pt-5006", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(3, 11, 0),  durationMinutes: 45, visitType: "treatment", status: "scheduled", location: "Main Clinic" },
+  { id: "apt-6024", patientId: "pt-5007", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(2, 14, 0),  durationMinutes: 45, visitType: "treatment", status: "scheduled", location: "Main Clinic" },
+  { id: "apt-6025", patientId: "pt-5003", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(0, 13, 0),  durationMinutes: 60, visitType: "evaluation", status: "confirmed", location: "Main Clinic" },
+  { id: "apt-6026", patientId: "pt-5005", therapist: "Alex Rivera, DPT", scheduledAt: apptAt(0, 15, 0),  durationMinutes: 60, visitType: "evaluation", status: "scheduled", location: "Main Clinic", notes: "Newly verified UHC auth — first visit since referral." },
+  { id: "apt-6027", patientId: "pt-5008", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(2, 9, 0),   durationMinutes: 60, visitType: "evaluation", status: "scheduled", location: "Satellite Clinic" },
+  { id: "apt-6028", patientId: "pt-5004", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(4, 10, 0),  durationMinutes: 45, visitType: "treatment", status: "scheduled", location: "Main Clinic" },
+  { id: "apt-6029", patientId: "pt-5002", therapist: "Morgan Chen, DPT", scheduledAt: apptAt(5, 10, 0),  durationMinutes: 45, visitType: "treatment", status: "scheduled", location: "Main Clinic", notes: "Pending UHC re-authorization — confirm before patient arrives." },
+];
+
+// Follow-ups — staff call queue (no auto-messaging, this is a TODO list)
+export const seedFollowups: Followup[] = [
+  {
+    id: "fu-7001",
+    patientId: "pt-5002", // Eleanor Brooks
+    reason: "auth-expiring",
+    dueDate: daysAgo(-2), // due in 2 days
+    status: "pending",
+    notes: "UHC re-auth needs to be submitted before her next visit on Friday.",
+  },
+  {
+    id: "fu-7002",
+    patientId: "pt-5001", // Susan Kowalski
+    reason: "no-show",
+    dueDate: daysAgo(-1),
+    status: "pending",
+    notes: "Susan missed her appointment 10 days ago. Confirm her current schedule.",
+  },
+  {
+    id: "fu-7003",
+    patientId: "pt-5004", // Linda Patel
+    reason: "post-discharge-30d",
+    dueDate: daysAgo(0), // due today
+    status: "pending",
+    notes: "30-day check-in. How are the knees holding up post-discharge?",
+  },
+  {
+    id: "fu-7004",
+    patientId: "pt-5006", // Patricia Nguyen
+    reason: "manual",
+    dueDate: daysAgo(-7),
+    status: "pending",
+    notes: "Patient mentioned a flare-up — schedule re-eval if needed.",
+  },
+  {
+    id: "fu-7005",
+    patientId: "pt-5003", // James Thompson
+    reason: "post-discharge-60d",
+    dueDate: daysAgo(-30),
+    status: "pending",
+    notes: "60-day follow-up scheduled. THA recovery check.",
+  },
+  // COMPLETED — show history
+  {
+    id: "fu-7006",
+    patientId: "pt-5001",
+    reason: "no-show",
+    dueDate: daysAgo(8),
+    status: "completed",
+    notes: "Called Susan. Rescheduled for next Tuesday.",
+    completedAt: new Date(daysAgo(7) + "T14:23:00Z").toISOString(),
+    completedBy: "Front Desk",
+  },
+];
+
+// Waitlist — patients waiting for an opening
+export const seedWaitlist: WaitlistEntry[] = [
+  {
+    id: "wl-8001",
+    patientId: "pt-5005", // Robert Williams
+    preferredDays: ["mon", "wed", "fri"],
+    preferredTimes: ["morning", "midday"],
+    therapistPreference: "Alex Rivera, DPT",
+    priority: "high",
+    notes: "RTC repair — provider asked for prompt scheduling. Will take any AM slot M/W/F.",
+    status: "active",
+    addedAt: new Date(daysAgo(2) + "T08:14:00Z").toISOString(),
+  },
+  {
+    id: "wl-8002",
+    patientId: "pt-5008", // Carol Ellison
+    preferredDays: ["tue", "thu"],
+    preferredTimes: ["afternoon"],
+    therapistPreference: "Morgan Chen, DPT",
+    priority: "normal",
+    notes: "Post-op TSA — needs afternoons due to work schedule.",
+    status: "active",
+    addedAt: new Date(daysAgo(5) + "T10:45:00Z").toISOString(),
+  },
+  {
+    id: "wl-8003",
+    patientId: "pt-5004", // Linda Patel
+    preferredDays: ["mon", "tue", "wed", "thu", "fri"],
+    preferredTimes: ["early-am", "morning"],
+    priority: "normal",
+    notes: "Open to any therapist. Prefers earliest slot of the day.",
+    status: "active",
+    addedAt: new Date(daysAgo(8) + "T09:00:00Z").toISOString(),
+  },
 ];

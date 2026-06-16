@@ -18,7 +18,15 @@
 
 import { getSupabase, SUPABASE_ENABLED } from "@/lib/supabase-client";
 import { useAppStore } from "@/lib/store";
-import { seedReferrals, seedPatients, seedCheckins, seedPromScores } from "@/lib/data/seed";
+import {
+  seedReferrals,
+  seedPatients,
+  seedCheckins,
+  seedPromScores,
+  seedAppointments,
+  seedFollowups,
+  seedWaitlist,
+} from "@/lib/data/seed";
 import type {
   Referral,
   Patient,
@@ -27,6 +35,15 @@ import type {
   Authorization,
   POCTransmission,
   ReferralStage,
+  Appointment,
+  AppointmentStatus,
+  VisitType,
+  Followup,
+  FollowupReason,
+  FollowupStatus,
+  WaitlistEntry,
+  WaitlistPriority,
+  WaitlistStatus,
 } from "@/lib/types";
 import type { Database } from "@/lib/db.types";
 
@@ -34,6 +51,9 @@ type ReferralRow = Database["public"]["Tables"]["referrals"]["Row"];
 type PatientRow = Database["public"]["Tables"]["patients"]["Row"];
 type CheckinRow = Database["public"]["Tables"]["rtm_checkins"]["Row"];
 type PROMRow = Database["public"]["Tables"]["prom_scores"]["Row"];
+type AppointmentRow = Database["public"]["Tables"]["appointments"]["Row"];
+type FollowupRow = Database["public"]["Tables"]["followups"]["Row"];
+type WaitlistRow = Database["public"]["Tables"]["waitlist"]["Row"];
 
 let booted = false;
 
@@ -51,11 +71,14 @@ export async function bootSupabaseSync(): Promise<void> {
   const { client, sessionId } = sb;
 
   // 1. Try to read existing rows for this session
-  const [refRes, patRes, chkRes, prmRes] = await Promise.all([
+  const [refRes, patRes, chkRes, prmRes, aptRes, fupRes, wlRes] = await Promise.all([
     client.from("referrals").select("*"),
     client.from("patients").select("*"),
     client.from("rtm_checkins").select("*"),
     client.from("prom_scores").select("*"),
+    client.from("appointments").select("*"),
+    client.from("followups").select("*"),
+    client.from("waitlist").select("*"),
   ]);
 
   const hasData =
@@ -69,6 +92,9 @@ export async function bootSupabaseSync(): Promise<void> {
       patients: (patRes.data ?? []).map(rowToPatient),
       checkins: (chkRes.data ?? []).map(rowToCheckin),
       promScores: (prmRes.data ?? []).map(rowToProm),
+      appointments: (aptRes.data ?? []).map(rowToAppointment),
+      followups: (fupRes.data ?? []).map(rowToFollowup),
+      waitlist: (wlRes.data ?? []).map(rowToWaitlist),
     });
   } else {
     // Fresh session — seed Supabase with the demo data
@@ -84,6 +110,15 @@ export async function bootSupabaseSync(): Promise<void> {
       ),
       client.from("prom_scores").insert(
         seedPromScores.map((s) => promToRow(s, sessionId)),
+      ),
+      client.from("appointments").insert(
+        seedAppointments.map((a) => appointmentToRow(a, sessionId)),
+      ),
+      client.from("followups").insert(
+        seedFollowups.map((f) => followupToRow(f, sessionId)),
+      ),
+      client.from("waitlist").insert(
+        seedWaitlist.map((w) => waitlistToRow(w, sessionId)),
       ),
     ]);
   }
@@ -136,6 +171,40 @@ export async function bootSupabaseSync(): Promise<void> {
       }
     }
 
+    // Appointments: insert + status updates
+    for (const a of next.appointments) {
+      const before = prev.appointments.find((x) => x.id === a.id);
+      if (!before) {
+        tasks.push(Promise.resolve(client.from("appointments").upsert(appointmentToRow(a, sessionId))));
+      } else if (before.status !== a.status) {
+        tasks.push(Promise.resolve(client.from("appointments").update({ status: a.status }).eq("id", a.id)));
+      }
+    }
+
+    // Followups: insert + status updates
+    for (const f of next.followups) {
+      const before = prev.followups.find((x) => x.id === f.id);
+      if (!before) {
+        tasks.push(Promise.resolve(client.from("followups").upsert(followupToRow(f, sessionId))));
+      } else if (
+        before.status !== f.status ||
+        before.notes !== f.notes ||
+        before.completedAt !== f.completedAt
+      ) {
+        tasks.push(Promise.resolve(client.from("followups").update(followupToRow(f, sessionId)).eq("id", f.id)));
+      }
+    }
+
+    // Waitlist: insert + status updates
+    for (const w of next.waitlist) {
+      const before = prev.waitlist.find((x) => x.id === w.id);
+      if (!before) {
+        tasks.push(Promise.resolve(client.from("waitlist").upsert(waitlistToRow(w, sessionId))));
+      } else if (before.status !== w.status) {
+        tasks.push(Promise.resolve(client.from("waitlist").update({ status: w.status }).eq("id", w.id)));
+      }
+    }
+
     prev = next;
     // Fire-and-forget; errors logged to console for visibility
     Promise.all(tasks).catch((err) => {
@@ -176,6 +245,27 @@ export async function bootSupabaseSync(): Promise<void> {
       { event: "*", schema: "public", table: "prom_scores", filter: sessionFilter },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (payload: any) => applyPromChange(payload as Payload<PROMRow>),
+    )
+    .on(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      "postgres_changes" as any,
+      { event: "*", schema: "public", table: "appointments", filter: sessionFilter },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (payload: any) => applyAppointmentChange(payload as Payload<AppointmentRow>),
+    )
+    .on(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      "postgres_changes" as any,
+      { event: "*", schema: "public", table: "followups", filter: sessionFilter },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (payload: any) => applyFollowupChange(payload as Payload<FollowupRow>),
+    )
+    .on(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      "postgres_changes" as any,
+      { event: "*", schema: "public", table: "waitlist", filter: sessionFilter },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (payload: any) => applyWaitlistChange(payload as Payload<WaitlistRow>),
     )
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {
@@ -427,4 +517,144 @@ function patientDiff(a: Patient, b: Patient): boolean {
     a.rtmEnrolledAt !== b.rtmEnrolledAt ||
     a.status !== b.status
   );
+}
+
+// ---------- Appointments / Followups / Waitlist mappers + appliers ----------
+
+function rowToAppointment(r: AppointmentRow): Appointment {
+  return {
+    id: r.id,
+    patientId: r.patient_id,
+    therapist: r.therapist,
+    scheduledAt: r.scheduled_at,
+    durationMinutes: r.duration_minutes,
+    visitType: r.visit_type as VisitType,
+    status: r.status as AppointmentStatus,
+    location: r.location ?? undefined,
+    notes: r.notes ?? undefined,
+    recurringSeriesId: r.recurring_series_id ?? undefined,
+  };
+}
+
+function appointmentToRow(a: Appointment, sessionId: string): AppointmentRow {
+  return {
+    id: a.id,
+    session_id: sessionId,
+    patient_id: a.patientId,
+    therapist: a.therapist,
+    scheduled_at: a.scheduledAt,
+    duration_minutes: a.durationMinutes,
+    visit_type: a.visitType,
+    status: a.status,
+    location: a.location ?? null,
+    notes: a.notes ?? null,
+    recurring_series_id: a.recurringSeriesId ?? null,
+    created_at: new Date().toISOString(),
+  };
+}
+
+function rowToFollowup(r: FollowupRow): Followup {
+  return {
+    id: r.id,
+    patientId: r.patient_id,
+    reason: r.reason as FollowupReason,
+    dueDate: r.due_date,
+    status: r.status as FollowupStatus,
+    notes: r.notes ?? undefined,
+    completedAt: r.completed_at ?? undefined,
+    completedBy: r.completed_by ?? undefined,
+  };
+}
+
+function followupToRow(f: Followup, sessionId: string): FollowupRow {
+  return {
+    id: f.id,
+    session_id: sessionId,
+    patient_id: f.patientId,
+    reason: f.reason,
+    due_date: f.dueDate,
+    status: f.status,
+    notes: f.notes ?? null,
+    completed_at: f.completedAt ?? null,
+    completed_by: f.completedBy ?? null,
+    created_at: new Date().toISOString(),
+  };
+}
+
+function rowToWaitlist(r: WaitlistRow): WaitlistEntry {
+  return {
+    id: r.id,
+    patientId: r.patient_id,
+    preferredDays: r.preferred_days,
+    preferredTimes: r.preferred_times,
+    therapistPreference: r.therapist_preference ?? undefined,
+    priority: r.priority as WaitlistPriority,
+    notes: r.notes ?? undefined,
+    status: r.status as WaitlistStatus,
+    addedAt: r.added_at,
+  };
+}
+
+function waitlistToRow(w: WaitlistEntry, sessionId: string): WaitlistRow {
+  return {
+    id: w.id,
+    session_id: sessionId,
+    patient_id: w.patientId,
+    preferred_days: w.preferredDays,
+    preferred_times: w.preferredTimes,
+    therapist_preference: w.therapistPreference ?? null,
+    priority: w.priority,
+    notes: w.notes ?? null,
+    status: w.status,
+    added_at: w.addedAt,
+    created_at: new Date().toISOString(),
+  };
+}
+
+function applyAppointmentChange(payload: Payload<AppointmentRow>): void {
+  withRemoteUpdate(() => {
+    useAppStore.setState((state) => {
+      if (payload.eventType === "DELETE") {
+        return { appointments: state.appointments.filter((a) => a.id !== payload.old.id) };
+      }
+      const next = rowToAppointment(payload.new);
+      const idx = state.appointments.findIndex((a) => a.id === next.id);
+      if (idx < 0) return { appointments: [next, ...state.appointments] };
+      const copy = state.appointments.slice();
+      copy[idx] = next;
+      return { appointments: copy };
+    });
+  });
+}
+
+function applyFollowupChange(payload: Payload<FollowupRow>): void {
+  withRemoteUpdate(() => {
+    useAppStore.setState((state) => {
+      if (payload.eventType === "DELETE") {
+        return { followups: state.followups.filter((f) => f.id !== payload.old.id) };
+      }
+      const next = rowToFollowup(payload.new);
+      const idx = state.followups.findIndex((f) => f.id === next.id);
+      if (idx < 0) return { followups: [next, ...state.followups] };
+      const copy = state.followups.slice();
+      copy[idx] = next;
+      return { followups: copy };
+    });
+  });
+}
+
+function applyWaitlistChange(payload: Payload<WaitlistRow>): void {
+  withRemoteUpdate(() => {
+    useAppStore.setState((state) => {
+      if (payload.eventType === "DELETE") {
+        return { waitlist: state.waitlist.filter((w) => w.id !== payload.old.id) };
+      }
+      const next = rowToWaitlist(payload.new);
+      const idx = state.waitlist.findIndex((w) => w.id === next.id);
+      if (idx < 0) return { waitlist: [next, ...state.waitlist] };
+      const copy = state.waitlist.slice();
+      copy[idx] = next;
+      return { waitlist: copy };
+    });
+  });
 }

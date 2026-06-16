@@ -101,6 +101,67 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["prom_scores"]["Insert"]>;
       };
+      appointments: {
+        Row: {
+          id: string;
+          session_id: string;
+          patient_id: string;
+          therapist: string;
+          scheduled_at: string;
+          duration_minutes: number;
+          visit_type: string;
+          status: string;
+          location: string | null;
+          notes: string | null;
+          recurring_series_id: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["appointments"]["Row"], "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["appointments"]["Insert"]>;
+      };
+      followups: {
+        Row: {
+          id: string;
+          session_id: string;
+          patient_id: string;
+          reason: string;
+          due_date: string;
+          status: string;
+          notes: string | null;
+          completed_at: string | null;
+          completed_by: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["followups"]["Row"], "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["followups"]["Insert"]>;
+      };
+      waitlist: {
+        Row: {
+          id: string;
+          session_id: string;
+          patient_id: string;
+          preferred_days: string[];
+          preferred_times: string[];
+          therapist_preference: string | null;
+          priority: string;
+          notes: string | null;
+          status: string;
+          added_at: string;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["waitlist"]["Row"], "id" | "created_at" | "added_at"> & {
+          id?: string;
+          added_at?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["waitlist"]["Insert"]>;
+      };
       audit_log: {
         Row: {
           id: number;

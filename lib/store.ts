@@ -10,14 +10,32 @@ import type {
   POCTransmission,
   Authorization,
   PROMScore,
+  Appointment,
+  AppointmentStatus,
+  Followup,
+  FollowupStatus,
+  WaitlistEntry,
+  WaitlistStatus,
 } from "@/lib/types";
-import { seedReferrals, seedPatients, seedCheckins, seedPromScores } from "@/lib/data/seed";
+import {
+  seedReferrals,
+  seedPatients,
+  seedCheckins,
+  seedPromScores,
+  seedAppointments,
+  seedFollowups,
+  seedWaitlist,
+} from "@/lib/data/seed";
 
 interface AppState {
   referrals: Referral[];
   patients: Patient[];
   checkins: RTMCheckin[];
   promScores: PROMScore[];
+  appointments: Appointment[];
+  followups: Followup[];
+  waitlist: WaitlistEntry[];
+
   addPROMScore: (s: Omit<PROMScore, "id">) => void;
   addReferral: (r: Omit<Referral, "id" | "pocTransmissions">) => void;
   updateReferralStage: (id: string, stage: ReferralStage) => void;
@@ -27,6 +45,24 @@ interface AppState {
   enrollRTM: (patientId: string) => void;
   unenrollRTM: (patientId: string) => void;
   addCheckin: (c: Omit<RTMCheckin, "id">) => void;
+
+  // Appointments
+  addAppointment: (a: Omit<Appointment, "id">) => void;
+  addAppointmentBatch: (as: Omit<Appointment, "id">[]) => void;
+  updateAppointmentStatus: (id: string, status: AppointmentStatus) => void;
+
+  // Followups
+  addFollowup: (f: Omit<Followup, "id">) => void;
+  updateFollowupStatus: (
+    id: string,
+    status: FollowupStatus,
+    extra?: { notes?: string; completedBy?: string },
+  ) => void;
+
+  // Waitlist
+  addWaitlistEntry: (w: Omit<WaitlistEntry, "id" | "addedAt">) => void;
+  updateWaitlistStatus: (id: string, status: WaitlistStatus) => void;
+
   resetToSeed: () => void;
 }
 
@@ -40,6 +76,9 @@ export const useAppStore = create<AppState>()(
       patients: seedPatients,
       checkins: seedCheckins,
       promScores: seedPromScores,
+      appointments: seedAppointments,
+      followups: seedFollowups,
+      waitlist: seedWaitlist,
 
       addPROMScore: (s) =>
         set((state) => ({
@@ -110,14 +149,75 @@ export const useAppStore = create<AppState>()(
           checkins: [{ ...c, id: uid("chk") }, ...s.checkins],
         })),
 
+      addAppointment: (a) =>
+        set((s) => ({
+          appointments: [{ ...a, id: uid("apt") }, ...s.appointments],
+        })),
+
+      addAppointmentBatch: (as) =>
+        set((s) => ({
+          appointments: [
+            ...as.map((a) => ({ ...a, id: uid("apt") })),
+            ...s.appointments,
+          ],
+        })),
+
+      updateAppointmentStatus: (id, status) =>
+        set((s) => ({
+          appointments: s.appointments.map((a) =>
+            a.id === id ? { ...a, status } : a,
+          ),
+        })),
+
+      addFollowup: (f) =>
+        set((s) => ({
+          followups: [{ ...f, id: uid("fu") }, ...s.followups],
+        })),
+
+      updateFollowupStatus: (id, status, extra) =>
+        set((s) => ({
+          followups: s.followups.map((f) =>
+            f.id === id
+              ? {
+                  ...f,
+                  status,
+                  completedAt:
+                    status === "completed"
+                      ? new Date().toISOString()
+                      : f.completedAt,
+                  notes: extra?.notes ?? f.notes,
+                  completedBy: extra?.completedBy ?? f.completedBy,
+                }
+              : f,
+          ),
+        })),
+
+      addWaitlistEntry: (w) =>
+        set((s) => ({
+          waitlist: [
+            { ...w, id: uid("wl"), addedAt: new Date().toISOString() } as WaitlistEntry,
+            ...s.waitlist,
+          ],
+        })),
+
+      updateWaitlistStatus: (id, status) =>
+        set((s) => ({
+          waitlist: s.waitlist.map((w) =>
+            w.id === id ? { ...w, status } : w,
+          ),
+        })),
+
       resetToSeed: () =>
         set({
           referrals: seedReferrals,
           patients: seedPatients,
           checkins: seedCheckins,
           promScores: seedPromScores,
+          appointments: seedAppointments,
+          followups: seedFollowups,
+          waitlist: seedWaitlist,
         }),
     }),
-    { name: "cadence-pt-store-v2" },
+    { name: "cadence-pt-store-v3" },
   ),
 );

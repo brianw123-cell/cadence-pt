@@ -119,7 +119,7 @@ export default function PatientsPage() {
                 return (
                   <tr key={p.id} className="border-b border-stone-100 hover:bg-stone-50">
                     <td className="px-4 py-3">
-                      <Link href={`/rtm/${p.id}`} className="font-medium text-teal-800 hover:underline">
+                      <Link href={`/cases/${p.id}`} className="font-medium text-teal-800 hover:underline">
                         {p.name}
                       </Link>
                     </td>

@@ -122,10 +122,39 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Wow feature quick links */}
+      {/* Case management quick links */}
       <div>
         <h2 className="text-sm font-bold uppercase tracking-wide text-stone-700 mb-3">
-          Explore
+          Daily workflow
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Link href="/schedule" className="card p-4 hover:shadow-md transition group">
+            <div className="text-2xl mb-1">📅</div>
+            <div className="font-semibold text-stone-900 text-sm group-hover:text-teal-700">Schedule</div>
+            <div className="text-xs text-stone-600 mt-1">Today's appointments + the next 14 days. Mark arrived, no-show, completed.</div>
+          </Link>
+          <Link href="/followups" className="card p-4 hover:shadow-md transition group">
+            <div className="text-2xl mb-1">📞</div>
+            <div className="font-semibold text-stone-900 text-sm group-hover:text-teal-700">Follow-ups</div>
+            <div className="text-xs text-stone-600 mt-1">Call queue: post-discharge check-ins, no-show recovery, auth expirations.</div>
+          </Link>
+          <Link href="/waitlist" className="card p-4 hover:shadow-md transition group">
+            <div className="text-2xl mb-1">📋</div>
+            <div className="font-semibold text-stone-900 text-sm group-hover:text-teal-700">Waitlist</div>
+            <div className="text-xs text-stone-600 mt-1">Slot just opened? Filter by day/time to find the right patient to call.</div>
+          </Link>
+          <Link href="/patients" className="card p-4 hover:shadow-md transition group">
+            <div className="text-2xl mb-1">📂</div>
+            <div className="font-semibold text-stone-900 text-sm group-hover:text-teal-700">Patient cases</div>
+            <div className="text-xs text-stone-600 mt-1">Every patient's complete timeline in one screen.</div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Insights quick links */}
+      <div>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-stone-700 mb-3">
+          Insights
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <Link href="/patient-app" className="card p-4 hover:shadow-md transition group">

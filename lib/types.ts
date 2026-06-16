@@ -172,6 +172,122 @@ export interface PROMScore {
   visit: number; // 1 = initial eval, N = Nth visit
 }
 
+// ---------- Appointments / scheduling ----------
+
+export type VisitType =
+  | "evaluation"
+  | "treatment"
+  | "progress-note"
+  | "re-evaluation"
+  | "discharge";
+
+export type AppointmentStatus =
+  | "scheduled"
+  | "confirmed"
+  | "arrived"
+  | "completed"
+  | "no-show"
+  | "cancelled"
+  | "rescheduled";
+
+export interface Appointment {
+  id: string;
+  patientId: string;
+  therapist: string;
+  scheduledAt: string; // ISO timestamp
+  durationMinutes: number;
+  visitType: VisitType;
+  status: AppointmentStatus;
+  location?: string;
+  notes?: string;
+  recurringSeriesId?: string;
+}
+
+export const VISIT_TYPE_LABELS: Record<VisitType, string> = {
+  evaluation: "Initial evaluation",
+  treatment: "Treatment",
+  "progress-note": "Progress note",
+  "re-evaluation": "Re-evaluation",
+  discharge: "Discharge visit",
+};
+
+export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
+  scheduled: "Scheduled",
+  confirmed: "Confirmed",
+  arrived: "Arrived",
+  completed: "Completed",
+  "no-show": "No-show",
+  cancelled: "Cancelled",
+  rescheduled: "Rescheduled",
+};
+
+// ---------- Follow-ups (staff queue, manual outreach) ----------
+
+export type FollowupReason =
+  | "post-discharge-30d"
+  | "post-discharge-60d"
+  | "post-discharge-90d"
+  | "no-show"
+  | "auth-expiring"
+  | "manual";
+
+export type FollowupStatus = "pending" | "completed" | "skipped" | "snoozed";
+
+export interface Followup {
+  id: string;
+  patientId: string;
+  reason: FollowupReason;
+  dueDate: string; // YYYY-MM-DD
+  status: FollowupStatus;
+  notes?: string;
+  completedAt?: string;
+  completedBy?: string;
+}
+
+export const FOLLOWUP_REASON_LABELS: Record<FollowupReason, string> = {
+  "post-discharge-30d": "30 days post-discharge",
+  "post-discharge-60d": "60 days post-discharge",
+  "post-discharge-90d": "90 days post-discharge",
+  "no-show": "No-show recovery",
+  "auth-expiring": "Authorization expiring",
+  manual: "Manual follow-up",
+};
+
+// ---------- Waitlist ----------
+
+export type WaitlistPriority = "low" | "normal" | "high" | "urgent";
+export type WaitlistStatus = "active" | "scheduled" | "removed";
+
+export interface WaitlistEntry {
+  id: string;
+  patientId: string;
+  preferredDays: string[]; // ['mon','tue','wed','thu','fri']
+  preferredTimes: string[]; // ['early-am','morning','midday','afternoon','evening']
+  therapistPreference?: string;
+  priority: WaitlistPriority;
+  notes?: string;
+  status: WaitlistStatus;
+  addedAt: string;
+}
+
+export const DAY_LABELS: Record<string, string> = {
+  mon: "Mon",
+  tue: "Tue",
+  wed: "Wed",
+  thu: "Thu",
+  fri: "Fri",
+  sat: "Sat",
+  sun: "Sun",
+};
+
+export const TIME_LABELS: Record<string, string> = {
+  "early-am": "Early AM",
+  morning: "Morning",
+  midday: "Midday",
+  afternoon: "Afternoon",
+  evening: "Evening",
+};
+
 // 2026 CMS Medicare Physician Fee Schedule national-average reimbursement rates
 export const RTM_RATES = {
   setup: { code: "98975", description: "Initial setup & patient education", amount: 19.65, frequency: "per episode" },

@@ -11,6 +11,9 @@ export {
   usePatientsRepo,
   useCheckinsRepo,
   usePROMsRepo,
+  useAppointmentsRepo,
+  useFollowupsRepo,
+  useWaitlistRepo,
 } from "./hooks";
 
 export type {
@@ -18,5 +21,8 @@ export type {
   PatientsRepo,
   CheckinsRepo,
   PROMsRepo,
+  AppointmentsRepo,
+  FollowupsRepo,
+  WaitlistRepo,
   CadenceRepo,
 } from "./types";
