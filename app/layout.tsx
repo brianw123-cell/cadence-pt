@@ -16,9 +16,25 @@ try {
 `;
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cadence-pt.vercel.app"),
   title: "Cadence PT — Referral Lifecycle + RTM Revenue",
   description:
     "Capture every referral. Log every plan-of-care transmission. Bill every dollar of RTM. Built for outpatient physical therapy.",
+  openGraph: {
+    title: "Cadence PT — Referral Lifecycle + RTM Revenue",
+    description:
+      "Capture every referral. Bill every RTM dollar. Catch denials before they ship. Built for outpatient physical therapy.",
+    url: "https://cadence-pt.vercel.app",
+    siteName: "Cadence PT",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cadence PT — Referral Lifecycle + RTM Revenue",
+    description:
+      "Capture every referral. Bill every RTM dollar. Catch denials before they ship.",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

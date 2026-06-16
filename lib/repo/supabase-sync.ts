@@ -37,6 +37,12 @@ type PROMRow = Database["public"]["Tables"]["prom_scores"]["Row"];
 
 let booted = false;
 
+// When a Realtime event arrives we update Zustand. That update triggers the
+// write-back subscriber, which would write the change back to Supabase, which
+// would broadcast another Realtime event, infinite loop. This flag is set
+// while we apply a remote change so the write-back subscriber knows to skip.
+let applyingRemote = false;
+
 export async function bootSupabaseSync(): Promise<void> {
   if (booted || !SUPABASE_ENABLED) return;
   booted = true;
@@ -85,6 +91,13 @@ export async function bootSupabaseSync(): Promise<void> {
   // 2. Subscribe to local mutations and write through to Supabase
   let prev = useAppStore.getState();
   useAppStore.subscribe((next) => {
+    if (applyingRemote) {
+      // The mutation came from a Realtime broadcast; don't echo it back to
+      // Supabase. Just refresh the diff baseline so the next real local
+      // mutation is detected correctly.
+      prev = next;
+      return;
+    }
     const tasks: Promise<unknown>[] = [];
 
     // Referrals: detect inserts and updates by id
@@ -127,6 +140,131 @@ export async function bootSupabaseSync(): Promise<void> {
     // Fire-and-forget; errors logged to console for visibility
     Promise.all(tasks).catch((err) => {
       console.error("[cadence-supabase-sync] write failed:", err);
+    });
+  });
+
+  // 3. Supabase Realtime — broadcast inbound changes to all tabs that share
+  //    this session_id. Open two browser tabs to the live site, mutate in one,
+  //    watch the other update within ~200ms. Proves the database is real.
+  const sessionFilter = `session_id=eq.${sessionId}`;
+  client
+    .channel(`cadence-session-${sessionId}`)
+    .on(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      "postgres_changes" as any,
+      { event: "*", schema: "public", table: "referrals", filter: sessionFilter },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (payload: any) => applyReferralChange(payload as Payload<ReferralRow>),
+    )
+    .on(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      "postgres_changes" as any,
+      { event: "*", schema: "public", table: "patients", filter: sessionFilter },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (payload: any) => applyPatientChange(payload as Payload<PatientRow>),
+    )
+    .on(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      "postgres_changes" as any,
+      { event: "*", schema: "public", table: "rtm_checkins", filter: sessionFilter },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (payload: any) => applyCheckinChange(payload as Payload<CheckinRow>),
+    )
+    .on(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      "postgres_changes" as any,
+      { event: "*", schema: "public", table: "prom_scores", filter: sessionFilter },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (payload: any) => applyPromChange(payload as Payload<PROMRow>),
+    )
+    .subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        console.info("[cadence-supabase-realtime] subscribed for session", sessionId);
+      }
+    });
+}
+
+// ---------- Realtime change appliers ----------
+// Each function applies a single row change from Postgres to the Zustand store
+// while applyingRemote=true so the write-back subscriber skips it. We don't
+// just naively replace state — we merge by id, preserving the existing
+// reactivity model.
+
+type Payload<T> = {
+  eventType: "INSERT" | "UPDATE" | "DELETE";
+  new: T;
+  old: Partial<T>;
+};
+
+function withRemoteUpdate(fn: () => void): void {
+  applyingRemote = true;
+  try {
+    fn();
+  } finally {
+    applyingRemote = false;
+  }
+}
+
+function applyReferralChange(payload: Payload<ReferralRow>): void {
+  withRemoteUpdate(() => {
+    useAppStore.setState((state) => {
+      if (payload.eventType === "DELETE") {
+        return { referrals: state.referrals.filter((r) => r.id !== payload.old.id) };
+      }
+      const next = rowToReferral(payload.new);
+      const idx = state.referrals.findIndex((r) => r.id === next.id);
+      if (idx < 0) return { referrals: [next, ...state.referrals] };
+      const copy = state.referrals.slice();
+      copy[idx] = next;
+      return { referrals: copy };
+    });
+  });
+}
+
+function applyPatientChange(payload: Payload<PatientRow>): void {
+  withRemoteUpdate(() => {
+    useAppStore.setState((state) => {
+      if (payload.eventType === "DELETE") {
+        return { patients: state.patients.filter((p) => p.id !== payload.old.id) };
+      }
+      const next = rowToPatient(payload.new);
+      const idx = state.patients.findIndex((p) => p.id === next.id);
+      if (idx < 0) return { patients: [next, ...state.patients] };
+      const copy = state.patients.slice();
+      copy[idx] = next;
+      return { patients: copy };
+    });
+  });
+}
+
+function applyCheckinChange(payload: Payload<CheckinRow>): void {
+  withRemoteUpdate(() => {
+    useAppStore.setState((state) => {
+      if (payload.eventType === "DELETE") {
+        return { checkins: state.checkins.filter((c) => c.id !== payload.old.id) };
+      }
+      const next = rowToCheckin(payload.new);
+      const idx = state.checkins.findIndex((c) => c.id === next.id);
+      if (idx < 0) return { checkins: [next, ...state.checkins] };
+      const copy = state.checkins.slice();
+      copy[idx] = next;
+      return { checkins: copy };
+    });
+  });
+}
+
+function applyPromChange(payload: Payload<PROMRow>): void {
+  withRemoteUpdate(() => {
+    useAppStore.setState((state) => {
+      if (payload.eventType === "DELETE") {
+        return { promScores: state.promScores.filter((p) => p.id !== payload.old.id) };
+      }
+      const next = rowToProm(payload.new);
+      const idx = state.promScores.findIndex((p) => p.id === next.id);
+      if (idx < 0) return { promScores: [next, ...state.promScores] };
+      const copy = state.promScores.slice();
+      copy[idx] = next;
+      return { promScores: copy };
     });
   });
 }
