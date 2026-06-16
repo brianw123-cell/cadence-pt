@@ -61,11 +61,16 @@ export default function PatientsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-teal-900">Patients</h1>
-        <p className="text-sm text-stone-600 mt-1">
-          Active caseload across all locations. Enroll Medicare patients in RTM with one click.
-        </p>
+      <div className="flex items-end justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-teal-900">Patients</h1>
+          <p className="text-sm text-stone-600 mt-1">
+            Active caseload across all locations. Enroll Medicare patients in RTM with one click.
+          </p>
+        </div>
+        <Link href="/patients/new" className="btn-primary">
+          + New patient
+        </Link>
       </div>
 
       {/* Search */}

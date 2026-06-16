@@ -76,6 +76,67 @@ export const newReferralSchema = z.object({
 
 export type NewReferralInput = z.infer<typeof newReferralSchema>;
 
+export const patientSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Patient name is required")
+    .max(120, "Patient name is too long"),
+  dateOfBirth: reasonableDOB,
+  primaryDiagnosis: z
+    .string()
+    .trim()
+    .min(3, "Diagnosis is required (3+ chars)")
+    .max(500, "Diagnosis is too long"),
+  primaryInsurance: z
+    .string()
+    .trim()
+    .min(2, "Insurance is required")
+    .max(200, "Insurance is too long"),
+  payerCategory: z.enum([
+    "medicare",
+    "medicare-advantage",
+    "commercial",
+    "medicaid",
+    "self-pay",
+  ]),
+  status: z.enum(["active", "discharged", "on-hold"]),
+  rtmEnrolled: z.boolean(),
+  primaryTherapist: z
+    .string()
+    .trim()
+    .max(120, "Therapist name is too long")
+    .optional()
+    .or(z.literal("")),
+});
+
+export type PatientInput = z.infer<typeof patientSchema>;
+
+export const appointmentSchema = z.object({
+  patientId: z.string().trim().min(1, "Pick a patient"),
+  therapist: z.string().trim().min(2, "Therapist is required"),
+  date: isoDate,
+  time: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "Time must be HH:MM"),
+  durationMinutes: z
+    .number()
+    .int()
+    .min(15, "Minimum 15 minutes")
+    .max(180, "Maximum 180 minutes"),
+  visitType: z.enum([
+    "evaluation",
+    "treatment",
+    "progress-note",
+    "re-evaluation",
+    "discharge",
+  ]),
+  location: z.string().trim().min(1, "Location is required"),
+  notes: z.string().trim().max(2000, "Notes too long").optional().or(z.literal("")),
+});
+
+export type AppointmentInput = z.infer<typeof appointmentSchema>;
+
 /**
  * Normalize Zod errors into a flat record keyed by field name. Easier for
  * forms to consume than the nested issue tree.

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useAppointmentsRepo, usePatientsRepo } from "@/lib/repo";
 import { toast } from "@/lib/toast";
 import EmptyState from "@/components/EmptyState";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import {
   APPOINTMENT_STATUS_LABELS,
   VISIT_TYPE_LABELS,
@@ -29,6 +30,7 @@ export default function SchedulePage() {
 
   const [therapistFilter, setTherapistFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("upcoming");
+  const [confirmDelete, setConfirmDelete] = useState<Appointment | null>(null);
 
   const therapists = useMemo(() => {
     const set = new Set<string>();
@@ -197,7 +199,7 @@ export default function SchedulePage() {
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
                           <span className={`badge ${statusTone[a.status]}`}>
                             <span className="sr-only">Status: </span>
                             {APPOINTMENT_STATUS_LABELS[a.status]}
@@ -216,6 +218,20 @@ export default function SchedulePage() {
                               </option>
                             ))}
                           </select>
+                          <Link
+                            href={`/schedule/${a.id}/edit`}
+                            className="text-xs text-teal-700 hover:text-teal-900 font-medium px-2"
+                            aria-label={`Edit appointment for ${patient?.name ?? "patient"}`}
+                          >
+                            ✎ Edit
+                          </Link>
+                          <button
+                            onClick={() => setConfirmDelete(a)}
+                            className="text-xs text-red-700 hover:text-red-800 font-medium px-2"
+                            aria-label={`Delete appointment for ${patient?.name ?? "patient"}`}
+                          >
+                            🗑 Delete
+                          </button>
                         </div>
                       </li>
                     );
@@ -226,6 +242,27 @@ export default function SchedulePage() {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        tone="danger"
+        title="Delete this appointment?"
+        body={
+          confirmDelete
+            ? `This permanently removes the ${new Date(confirmDelete.scheduledAt).toLocaleDateString()} appointment for ${patients.get(confirmDelete.patientId)?.name ?? "this patient"}. The patient record itself is unaffected.`
+            : ""
+        }
+        confirmLabel="Delete appointment"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          if (!confirmDelete) return;
+          const name = patients.get(confirmDelete.patientId)?.name ?? "patient";
+          repo.remove(confirmDelete.id);
+          toast.warning(`Appointment for ${name} deleted`);
+          setConfirmDelete(null);
+        }}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

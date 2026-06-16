@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { useReferralsRepo } from "@/lib/repo";
@@ -14,10 +14,12 @@ import { formatDate, age } from "@/lib/utils";
 
 export default function ReferralDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const repo = useReferralsRepo();
   const referral = repo.get(id);
 
   const [pendingDischarge, setPendingDischarge] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (!referral) {
     return (
@@ -61,13 +63,22 @@ export default function ReferralDetailPage() {
             Age {age(referral.dateOfBirth)} · DOB {formatDate(referral.dateOfBirth)} · {referral.location}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="badge bg-teal-100 text-teal-800">{STAGE_LABELS[referral.stage]}</span>
           {referral.stage !== "discharged" && nextStage && (
             <button onClick={advance} className="btn-primary">
               Advance to {STAGE_LABELS[nextStage]} →
             </button>
           )}
+          <Link href={`/referrals/${referral.id}/edit`} className="btn-secondary text-sm">
+            ✎ Edit
+          </Link>
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="btn-secondary text-sm text-red-700 hover:text-red-800"
+          >
+            🗑 Delete
+          </button>
         </div>
       </div>
 
@@ -116,6 +127,22 @@ export default function ReferralDetailPage() {
         cancelLabel="Not yet"
         onConfirm={confirmDischarge}
         onCancel={() => setPendingDischarge(false)}
+      />
+
+      <ConfirmDialog
+        open={confirmDelete}
+        tone="danger"
+        title={`Delete this referral?`}
+        body={`This permanently removes the referral for ${referral.patientName}, plus its authorization and Plan of Care transmission log. The patient record itself remains. This action cannot be undone.`}
+        confirmLabel="Delete referral"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          const name = referral.patientName;
+          repo.remove(referral.id);
+          toast.warning(`Referral for ${name} deleted`);
+          router.push("/referrals");
+        }}
+        onCancel={() => setConfirmDelete(false)}
       />
     </div>
   );

@@ -30,6 +30,8 @@ export interface ReferralsRepo {
   list(): Referral[];
   get(id: string): Referral | undefined;
   create(referral: Omit<Referral, "id" | "pocTransmissions">): void;
+  update(id: string, patch: Partial<Omit<Referral, "id" | "pocTransmissions" | "authorization">>): void;
+  remove(id: string): void;
   updateStage(id: string, stage: ReferralStage): void;
   addPOCTransmission(referralId: string, t: Omit<POCTransmission, "id">): void;
   setAuthorization(referralId: string, a: Omit<Authorization, "id">): void;
@@ -39,6 +41,9 @@ export interface ReferralsRepo {
 export interface PatientsRepo {
   list(): Patient[];
   get(id: string): Patient | undefined;
+  create(p: Omit<Patient, "id">): string;
+  update(id: string, patch: Partial<Omit<Patient, "id">>): void;
+  remove(id: string): void;
   enrollRTM(id: string): void;
   unenrollRTM(id: string): void;
 }
@@ -57,10 +62,13 @@ export interface PROMsRepo {
 
 export interface AppointmentsRepo {
   list(): Appointment[];
+  get(id: string): Appointment | undefined;
   listForPatient(patientId: string): Appointment[];
   create(a: Omit<Appointment, "id">): void;
   createBatch(as: Omit<Appointment, "id">[]): void;
+  update(id: string, patch: Partial<Omit<Appointment, "id">>): void;
   updateStatus(id: string, status: AppointmentStatus): void;
+  remove(id: string): void;
 }
 
 export interface FollowupsRepo {

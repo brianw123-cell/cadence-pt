@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import {
   usePatientsRepo,
   useReferralsRepo,
@@ -11,6 +11,8 @@ import {
   useCheckinsRepo,
   usePROMsRepo,
 } from "@/lib/repo";
+import { toast } from "@/lib/toast";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import {
   PROM_INSTRUMENTS,
   VISIT_TYPE_LABELS,
@@ -48,7 +50,10 @@ const badgeTone: Record<string, string> = {
 
 export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const patient = usePatientsRepo().get(id);
+  const router = useRouter();
+  const patientsRepo = usePatientsRepo();
+  const patient = patientsRepo.get(id);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const referrals = useReferralsRepo().list().filter((r) => r.patientName === patient?.name);
   const appointments = useAppointmentsRepo().listForPatient(id);
   const followups = useFollowupsRepo().listForPatient(id);
@@ -205,17 +210,46 @@ export default function CaseDetailPage() {
         ← Back to patients
       </Link>
 
-      <div>
-        <div className="flex items-baseline gap-3 flex-wrap">
-          <h1 className="text-2xl font-bold text-teal-900">{patient.name}</h1>
-          <span className="text-sm text-stone-500">
-            Age {age(patient.dateOfBirth)} · {patient.primaryDiagnosis}
-          </span>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <h1 className="text-2xl font-bold text-teal-900">{patient.name}</h1>
+            <span className="text-sm text-stone-500">
+              Age {age(patient.dateOfBirth)} · {patient.primaryDiagnosis}
+            </span>
+          </div>
+          <p className="text-sm text-stone-600 mt-1">
+            {patient.primaryInsurance} · Therapist: {patient.primaryTherapist ?? "Unassigned"}
+          </p>
         </div>
-        <p className="text-sm text-stone-600 mt-1">
-          {patient.primaryInsurance} · Therapist: {patient.primaryTherapist ?? "Unassigned"}
-        </p>
+        <div className="flex gap-2 flex-shrink-0">
+          <Link href={`/patients/${patient.id}/edit`} className="btn-secondary text-sm">
+            ✎ Edit
+          </Link>
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="btn-secondary text-sm text-red-700 hover:text-red-800"
+          >
+            🗑 Delete
+          </button>
+        </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        tone="danger"
+        title={`Delete ${patient.name}?`}
+        body="This removes the patient and ALL related records: appointments, RTM check-ins, outcomes scores, follow-ups, and waitlist entries. Referrals tied to this patient are NOT cascaded — they remain in the funnel for historical record. This action cannot be undone."
+        confirmLabel="Delete patient"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          const name = patient.name;
+          patientsRepo.remove(patient.id);
+          toast.warning(`${name} deleted`, "Patient and related records removed.");
+          router.push("/patients");
+        }}
+        onCancel={() => setConfirmDelete(false)}
+      />
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

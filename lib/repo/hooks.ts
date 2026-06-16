@@ -26,6 +26,8 @@ import type {
 export function useReferralsRepo(): ReferralsRepo {
   const referrals = useAppStore((s) => s.referrals);
   const addReferral = useAppStore((s) => s.addReferral);
+  const updateReferral = useAppStore((s) => s.updateReferral);
+  const deleteReferral = useAppStore((s) => s.deleteReferral);
   const updateReferralStage = useAppStore((s) => s.updateReferralStage);
   const addPOCTransmission = useAppStore((s) => s.addPOCTransmission);
   const setAuthorization = useAppStore((s) => s.setAuthorization);
@@ -35,6 +37,8 @@ export function useReferralsRepo(): ReferralsRepo {
     list: () => referrals,
     get: (id) => referrals.find((r) => r.id === id),
     create: addReferral,
+    update: updateReferral,
+    remove: deleteReferral,
     updateStage: updateReferralStage,
     addPOCTransmission,
     setAuthorization,
@@ -44,12 +48,18 @@ export function useReferralsRepo(): ReferralsRepo {
 
 export function usePatientsRepo(): PatientsRepo {
   const patients = useAppStore((s) => s.patients);
+  const addPatient = useAppStore((s) => s.addPatient);
+  const updatePatient = useAppStore((s) => s.updatePatient);
+  const deletePatient = useAppStore((s) => s.deletePatient);
   const enrollRTM = useAppStore((s) => s.enrollRTM);
   const unenrollRTM = useAppStore((s) => s.unenrollRTM);
 
   return {
     list: () => patients,
     get: (id) => patients.find((p) => p.id === id),
+    create: addPatient,
+    update: updatePatient,
+    remove: deletePatient,
     enrollRTM,
     unenrollRTM,
   };
@@ -81,14 +91,19 @@ export function useAppointmentsRepo(): AppointmentsRepo {
   const appointments = useAppStore((s) => s.appointments);
   const addAppointment = useAppStore((s) => s.addAppointment);
   const addAppointmentBatch = useAppStore((s) => s.addAppointmentBatch);
+  const updateAppointment = useAppStore((s) => s.updateAppointment);
   const updateAppointmentStatus = useAppStore((s) => s.updateAppointmentStatus);
+  const deleteAppointment = useAppStore((s) => s.deleteAppointment);
 
   return {
     list: () => appointments,
+    get: (id) => appointments.find((a) => a.id === id),
     listForPatient: (patientId) => appointments.filter((a) => a.patientId === patientId),
     create: addAppointment,
     createBatch: addAppointmentBatch,
+    update: updateAppointment,
     updateStatus: updateAppointmentStatus,
+    remove: deleteAppointment,
   };
 }
 

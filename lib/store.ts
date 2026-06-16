@@ -38,10 +38,17 @@ interface AppState {
 
   addPROMScore: (s: Omit<PROMScore, "id">) => void;
   addReferral: (r: Omit<Referral, "id" | "pocTransmissions">) => void;
+  updateReferral: (id: string, patch: Partial<Omit<Referral, "id" | "pocTransmissions" | "authorization">>) => void;
+  deleteReferral: (id: string) => void;
   updateReferralStage: (id: string, stage: ReferralStage) => void;
   addPOCTransmission: (referralId: string, t: Omit<POCTransmission, "id">) => void;
   setAuthorization: (referralId: string, a: Omit<Authorization, "id">) => void;
   incrementVisitsUsed: (referralId: string) => void;
+
+  // Patients
+  addPatient: (p: Omit<Patient, "id">) => string;
+  updatePatient: (id: string, patch: Partial<Omit<Patient, "id">>) => void;
+  deletePatient: (id: string) => void;
   enrollRTM: (patientId: string) => void;
   unenrollRTM: (patientId: string) => void;
   addCheckin: (c: Omit<RTMCheckin, "id">) => void;
@@ -49,7 +56,9 @@ interface AppState {
   // Appointments
   addAppointment: (a: Omit<Appointment, "id">) => void;
   addAppointmentBatch: (as: Omit<Appointment, "id">[]) => void;
+  updateAppointment: (id: string, patch: Partial<Omit<Appointment, "id">>) => void;
   updateAppointmentStatus: (id: string, status: AppointmentStatus) => void;
+  deleteAppointment: (id: string) => void;
 
   // Followups
   addFollowup: (f: Omit<Followup, "id">) => void;
@@ -93,6 +102,16 @@ export const useAppStore = create<AppState>()(
           ],
         })),
 
+      updateReferral: (id, patch) =>
+        set((s) => ({
+          referrals: s.referrals.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+        })),
+
+      deleteReferral: (id) =>
+        set((s) => ({
+          referrals: s.referrals.filter((r) => r.id !== id),
+        })),
+
       updateReferralStage: (id, stage) =>
         set((s) => ({
           referrals: s.referrals.map((r) => (r.id === id ? { ...r, stage } : r)),
@@ -126,6 +145,27 @@ export const useAppStore = create<AppState>()(
               },
             };
           }),
+        })),
+
+      addPatient: (p) => {
+        const id = uid("pt");
+        set((s) => ({ patients: [{ ...p, id }, ...s.patients] }));
+        return id;
+      },
+
+      updatePatient: (id, patch) =>
+        set((s) => ({
+          patients: s.patients.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+        })),
+
+      deletePatient: (id) =>
+        set((s) => ({
+          patients: s.patients.filter((p) => p.id !== id),
+          checkins: s.checkins.filter((c) => c.patientId !== id),
+          promScores: s.promScores.filter((sc) => sc.patientId !== id),
+          appointments: s.appointments.filter((a) => a.patientId !== id),
+          followups: s.followups.filter((f) => f.patientId !== id),
+          waitlist: s.waitlist.filter((w) => w.patientId !== id),
         })),
 
       enrollRTM: (patientId) =>
@@ -162,11 +202,21 @@ export const useAppStore = create<AppState>()(
           ],
         })),
 
+      updateAppointment: (id, patch) =>
+        set((s) => ({
+          appointments: s.appointments.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+        })),
+
       updateAppointmentStatus: (id, status) =>
         set((s) => ({
           appointments: s.appointments.map((a) =>
             a.id === id ? { ...a, status } : a,
           ),
+        })),
+
+      deleteAppointment: (id) =>
+        set((s) => ({
+          appointments: s.appointments.filter((a) => a.id !== id),
         })),
 
       addFollowup: (f) =>

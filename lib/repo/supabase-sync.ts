@@ -205,6 +205,50 @@ export async function bootSupabaseSync(): Promise<void> {
       }
     }
 
+    // Deletions — for each previous row that no longer exists in next, issue
+    // a DELETE. Postgres cascade handles cross-table cleanup; we still need
+    // to fire the parent delete.
+    for (const r of prev.referrals) {
+      if (!next.referrals.find((x) => x.id === r.id)) {
+        tasks.push(Promise.resolve(client.from("referrals").delete().eq("id", r.id)));
+      }
+    }
+    for (const p of prev.patients) {
+      if (!next.patients.find((x) => x.id === p.id)) {
+        tasks.push(Promise.resolve(client.from("patients").delete().eq("id", p.id)));
+      }
+    }
+    for (const a of prev.appointments) {
+      if (!next.appointments.find((x) => x.id === a.id)) {
+        tasks.push(Promise.resolve(client.from("appointments").delete().eq("id", a.id)));
+      }
+    }
+
+    // Full-row updates (edits beyond status). Detect via deep-ish equality on
+    // a small fingerprint that excludes the always-changing created_at.
+    for (const r of next.referrals) {
+      const before = prev.referrals.find((x) => x.id === r.id);
+      if (!before) continue;
+      // Detect edits to non-stage, non-auth, non-poc fields
+      if (referralEditDiff(before, r)) {
+        tasks.push(Promise.resolve(client.from("referrals").update(referralToRow(r, sessionId)).eq("id", r.id)));
+      }
+    }
+    for (const p of next.patients) {
+      const before = prev.patients.find((x) => x.id === p.id);
+      if (!before) continue;
+      if (patientEditDiff(before, p)) {
+        tasks.push(Promise.resolve(client.from("patients").update(patientToRow(p, sessionId)).eq("id", p.id)));
+      }
+    }
+    for (const a of next.appointments) {
+      const before = prev.appointments.find((x) => x.id === a.id);
+      if (!before) continue;
+      if (appointmentEditDiff(before, a)) {
+        tasks.push(Promise.resolve(client.from("appointments").update(appointmentToRow(a, sessionId)).eq("id", a.id)));
+      }
+    }
+
     prev = next;
     // Fire-and-forget; errors logged to console for visibility
     Promise.all(tasks).catch((err) => {
@@ -516,6 +560,46 @@ function patientDiff(a: Patient, b: Patient): boolean {
     a.rtmEnrolled !== b.rtmEnrolled ||
     a.rtmEnrolledAt !== b.rtmEnrolledAt ||
     a.status !== b.status
+  );
+}
+
+// Edit diffs detect changes to "profile" fields that referralDiff/patientDiff
+// don't cover. These fire when a user edits via the new edit forms.
+function referralEditDiff(a: Referral, b: Referral): boolean {
+  return (
+    a.patientName !== b.patientName ||
+    a.dateOfBirth !== b.dateOfBirth ||
+    a.diagnosis !== b.diagnosis ||
+    a.diagnosisCode !== b.diagnosisCode ||
+    a.referringPhysician !== b.referringPhysician ||
+    a.physicianFax !== b.physicianFax ||
+    a.intakeChannel !== b.intakeChannel ||
+    a.insurancePrimary !== b.insurancePrimary ||
+    a.insuranceMemberId !== b.insuranceMemberId ||
+    a.priorAuthRequired !== b.priorAuthRequired ||
+    a.location !== b.location
+  );
+}
+
+function patientEditDiff(a: Patient, b: Patient): boolean {
+  return (
+    a.name !== b.name ||
+    a.dateOfBirth !== b.dateOfBirth ||
+    a.primaryDiagnosis !== b.primaryDiagnosis ||
+    a.primaryInsurance !== b.primaryInsurance ||
+    a.payerCategory !== b.payerCategory ||
+    a.primaryTherapist !== b.primaryTherapist
+  );
+}
+
+function appointmentEditDiff(a: Appointment, b: Appointment): boolean {
+  return (
+    a.scheduledAt !== b.scheduledAt ||
+    a.durationMinutes !== b.durationMinutes ||
+    a.therapist !== b.therapist ||
+    a.visitType !== b.visitType ||
+    a.location !== b.location ||
+    a.notes !== b.notes
   );
 }
 
