@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
 
 // Generated on every cold deploy. Cached at the CDN edge after that.
+// The Stride brand: warm sandstone background, terracotta + charcoal step
+// marks, deep charcoal text. Reads confident and human-scale, not medical-tech.
 export const runtime = "edge";
 export const alt =
   "Cadence PT — Referral lifecycle, RTM revenue, denial protection for outpatient physical therapy";
@@ -16,45 +18,68 @@ export default async function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          background:
-            "linear-gradient(135deg, #0f3a47 0%, #1a5a6b 50%, #0c4a5a 100%)",
+          background: "#ebd4b8",
           padding: 80,
           fontFamily: "system-ui, sans-serif",
-          color: "white",
+          color: "#2e2620",
           position: "relative",
         }}
       >
         {/* Logo + brand */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+          {/* Stride mark tile */}
           <div
             style={{
-              width: 80,
-              height: 80,
-              borderRadius: 16,
-              background: "#5eead4",
+              width: 96,
+              height: 96,
+              borderRadius: 20,
+              background: "#f5e6c8",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 56,
-              fontWeight: 800,
-              color: "#0c4a5a",
+              position: "relative",
             }}
           >
-            C
+            <div
+              style={{
+                position: "absolute",
+                width: 28,
+                height: 46,
+                left: 22,
+                top: 32,
+                background: "#2e2620",
+                borderRadius: 999,
+                transform: "rotate(-14deg)",
+                display: "flex",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                width: 28,
+                height: 46,
+                left: 46,
+                top: 16,
+                background: "#b45640",
+                borderRadius: 999,
+                transform: "rotate(12deg)",
+                display: "flex",
+              }}
+            />
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: 52, fontWeight: 800, lineHeight: 1.1 }}>
+            <div style={{ fontSize: 56, fontWeight: 800, lineHeight: 1.05, color: "#2e2620" }}>
               Cadence PT
             </div>
             <div
               style={{
-                fontSize: 22,
-                color: "#a8cfd5",
+                fontSize: 20,
+                color: "#b45640",
                 marginTop: 4,
-                letterSpacing: 0.5,
+                letterSpacing: 3,
+                fontWeight: 700,
+                textTransform: "uppercase",
               }}
             >
-              Built for outpatient physical therapy
+              Physical Therapy
             </div>
           </div>
         </div>
@@ -64,7 +89,7 @@ export default async function OpengraphImage() {
           style={{
             display: "flex",
             flexDirection: "column",
-            marginTop: 60,
+            marginTop: 68,
             gap: 16,
           }}
         >
@@ -73,7 +98,8 @@ export default async function OpengraphImage() {
               fontSize: 72,
               fontWeight: 800,
               lineHeight: 1.05,
-              letterSpacing: -1,
+              letterSpacing: -1.5,
+              color: "#2e2620",
             }}
           >
             Capture every referral.
@@ -83,7 +109,8 @@ export default async function OpengraphImage() {
               fontSize: 72,
               fontWeight: 800,
               lineHeight: 1.05,
-              letterSpacing: -1,
+              letterSpacing: -1.5,
+              color: "#2e2620",
             }}
           >
             Bill every RTM dollar.
@@ -93,8 +120,8 @@ export default async function OpengraphImage() {
               fontSize: 72,
               fontWeight: 800,
               lineHeight: 1.05,
-              letterSpacing: -1,
-              color: "#5eead4",
+              letterSpacing: -1.5,
+              color: "#b45640",
             }}
           >
             Catch denials before they ship.
@@ -110,17 +137,20 @@ export default async function OpengraphImage() {
             position: "absolute",
             left: 80,
             right: 80,
-            bottom: 64,
+            bottom: 60,
             fontSize: 22,
           }}
         >
-          <div style={{ color: "#a8cfd5" }}>cadence-pt.vercel.app</div>
+          <div style={{ color: "#7a5d3a", fontWeight: 600 }}>
+            cadence-pt.vercel.app
+          </div>
           <div
             style={{
               display: "flex",
               gap: 12,
               alignItems: "center",
-              color: "#a8cfd5",
+              color: "#7a5d3a",
+              fontWeight: 600,
             }}
           >
             <div>Referrals</div>

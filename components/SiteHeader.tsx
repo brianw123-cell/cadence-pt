@@ -32,14 +32,29 @@ export default function SiteHeader() {
   return (
     <header className="border-b" style={{ background: "var(--header-bg)", borderColor: "var(--header-border)" }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6 py-3 flex items-center justify-between gap-3">
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <div className="h-7 w-7 rounded bg-teal-700 flex items-center justify-center text-white text-sm font-bold">
-            C
-          </div>
+        <Link href="/" className="flex items-center gap-2 flex-shrink-0" aria-label="Cadence PT home">
+          {/* Stride brand mark — two overlapping "step" shapes on a sandstone tile */}
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 100 100"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            className="flex-shrink-0"
+          >
+            <rect x="0" y="0" width="100" height="100" rx="22" ry="22" fill="#ebd4b8" />
+            <ellipse cx="38" cy="60" rx="15" ry="24" fill="#2e2620" transform="rotate(-14 38 60)" />
+            <ellipse cx="62" cy="42" rx="15" ry="24" fill="#b45640" transform="rotate(12 62 42)" />
+          </svg>
           <div>
-            <div className="font-bold text-teal-800 dark:text-teal-300 leading-none">Cadence PT</div>
-            <div className="text-[10px] leading-none mt-0.5 hidden sm:block" style={{ color: "var(--subtle)" }}>
-              Referral lifecycle + RTM
+            <div className="font-bold leading-none" style={{ color: "#2e2620" }}>
+              <span className="dark:text-stone-50">Cadence PT</span>
+            </div>
+            <div
+              className="text-[10px] leading-none mt-0.5 hidden sm:block font-semibold tracking-widest uppercase"
+              style={{ color: "#b45640" }}
+            >
+              Physical Therapy
             </div>
           </div>
         </Link>
