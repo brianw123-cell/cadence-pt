@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-// iOS home-screen icon (180×180). The Stride brand mark on a warm sandstone
+// iOS home-screen icon (180×180). The Cadence brand mark on a warm sandstone
 // tile, extending edge-to-edge so iOS's rounded-corner mask sits cleanly on
 // top of the design without clipping the "step" shapes.
 export const runtime = "edge";

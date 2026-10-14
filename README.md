@@ -1,5 +1,7 @@
 # Cadence PT
 
+**Live demo:** https://cadence-pt.vercel.app
+
 POC build of two physical therapy software opportunities, packaged as one product.
 
 **Opportunity 1 — Referral Lifecycle Manager.** Captures every inbound physician referral, runs it through a kanban funnel, tracks authorization counts against the UHC 6-visit threshold, and logs Plan-of-Care transmissions to satisfy Medicare's January 2025 certification rule.
@@ -9,7 +11,8 @@ POC build of two physical therapy software opportunities, packaged as one produc
 ## Quick start
 
 ```bash
-cd "/Users/brianwest/Documents/Claude Code/Physical Therepy Software/cadence-pt"
+git clone https://github.com/brianw123-cell/cadence-pt.git
+cd cadence-pt
 npm install
 npm run dev
 ```
@@ -43,11 +46,11 @@ No `.env.local` required. All data is seeded from `lib/data/seed.ts` and persist
 
 ## Test this
 
-1. `cd "/Users/brianwest/Documents/Claude Code/Physical Therepy Software/cadence-pt" && npm install && npm run dev`
+1. `npm install && npm run dev`
 2. Open `http://localhost:3000/` — confirm the Dashboard shows KPIs (New today: 1, In funnel: 4, Active treatment: 2, Auth at risk: 1, Projected RTM revenue ~ $451)
 3. Click **Referrals** → confirm the kanban shows 8 columns with referrals in each stage
 4. Click any referral card → confirm the detail page shows Authorization sidebar and POC transmission log
-5. On a referral that has an `evaluationDate` and no POC sent (try `ref-1005` James Thompson — actually he has one — try one in the `evaluated` stage), click **+ Log transmission** and confirm a row appears in the POC log
+5. On a referral that has an `evaluationDate` and no POC sent (pick one in the `evaluated` stage), click **+ Log transmission** and confirm a row appears in the POC log
 6. Click **+ New referral**, fill out the form, submit, and confirm it lands in the "New" column of the funnel
 7. Click **Patients** → confirm the table lists 8 patients with payer badges, click **Enroll in RTM** on a Medicare patient who isn't enrolled (Linda Patel) and confirm the Dashboard's Projected RTM revenue increases
 8. Click **RTM** → confirm Projected/Untapped/Annualized revenue cards, CMS code table, and enrolled-patient grid

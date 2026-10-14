@@ -33,7 +33,7 @@ export default function SiteHeader() {
     <header className="border-b" style={{ background: "var(--header-bg)", borderColor: "var(--header-border)" }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6 py-3 flex items-center justify-between gap-3">
         <Link href="/" className="flex items-center gap-2 flex-shrink-0" aria-label="Cadence PT home">
-          {/* Stride brand mark — two overlapping "step" shapes on a sandstone tile */}
+          {/* Cadence brand mark — two overlapping "step" shapes on a sandstone tile */}
           <svg
             width="28"
             height="28"

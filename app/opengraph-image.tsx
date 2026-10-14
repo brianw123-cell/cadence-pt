@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 // Generated on every cold deploy. Cached at the CDN edge after that.
-// The Stride brand: warm sandstone background, terracotta + charcoal step
+// The Cadence brand: warm sandstone background, terracotta + charcoal step
 // marks, deep charcoal text. Reads confident and human-scale, not medical-tech.
 export const runtime = "edge";
 export const alt =
@@ -27,7 +27,7 @@ export default async function OpengraphImage() {
       >
         {/* Logo + brand */}
         <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
-          {/* Stride mark tile */}
+          {/* Cadence mark tile */}
           <div
             style={{
               width: 96,

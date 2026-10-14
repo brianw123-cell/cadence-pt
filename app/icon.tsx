@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-// 32x32 favicon — the Stride mark: two overlapping "step" shapes on a
+// 32x32 favicon — the Cadence mark: two overlapping "step" shapes on a
 // warm sandstone tile. Charcoal back step, terracotta front step, tilted
 // as if mid-stride. Palette matches the app's brand: terracotta #b45640,
 // sandstone #ebd4b8, charcoal #2e2620.
